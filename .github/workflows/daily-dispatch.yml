@@ -1,0 +1,60 @@
+name: Personal University Daily Morning Dispatch
+
+on:
+  # Runs Monday through Friday at 11:00 UTC (07:00 AM EDT / 06:00 AM EST)
+  schedule:
+    - cron: '0 11 * * 1-5'
+  # Allows triggering manually from the GitHub Actions tab anytime
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force dispatch delivery now (bypass day/duplicate checks)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  dispatch:
+    name: Generate & Deliver Daily Syllabus
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Execute Autonomous Dispatch Engine
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ "${{ inputs.force }}" = "true" ]; then
+            node scripts/cloud-dispatch.mjs --force
+          else
+            node scripts/cloud-dispatch.mjs
+          fi
+
+      - name: Archive and persist dispatch history
+        run: |
+          git config user.name "Personal University Bot"
+          git config user.email "bot@personaluniversity.edu"
+          if [ -n "$(git status --porcelain data/dispatch_history.json)" ]; then
+            git add data/dispatch_history.json
+            git commit -m "chore(dispatch): record daily syllabus dispatch [skip ci]"
+            git push
+          else
+            echo "No new dispatch history to commit."
+          fi

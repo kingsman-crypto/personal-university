@@ -1,0 +1,19 @@
+{
+  "title": "The Personal University Dispatch",
+  "subtitle": "Your Daily Curated Morning Syllabus",
+  "recipientEmail": "omghubert@gmail.com",
+  "recipientName": "Hubert",
+  "deliveryDays": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "deliveryTime": "07:00",
+  "timezone": "America/New_York",
+  "emailProvider": "gmail",
+  "senderEmail": "Personal University <onboarding@resend.dev>",
+  "gmailUser": "omghubert@gmail.com",
+  "gmailAppPassword": "abwl bvil axrc rmba"
+}
