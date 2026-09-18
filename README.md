@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal University 🎓
 
-## Getting Started
+A personalized daily educational dispatch platform delivering curated morning syllabi straight to your email inbox.
 
-First, run the development server:
+---
+
+## ⚡ Automated Daily Dispatches (Computer-Off Delivery)
+
+Personal University is designed to generate and send daily morning dispatches **even when your computer is completely turned off or asleep**.
+
+### How Cloud Delivery Works
+Daily dispatches are scheduled and delivered via **GitHub Actions** (`.github/workflows/daily-dispatch.yml`):
+- **Cloud Cron**: Executes Monday through Friday at **11:00 UTC (07:00 AM EDT / 06:00 AM EST)** in GitHub's cloud environment.
+- **Independent Execution**: Generates your unique course lessons (with zero-repetition safeguards), compiles the responsive HTML email, and delivers it via Gmail SMTP to `omghubert@gmail.com`.
+- **Automatic History Persistence**: Commits and pushes the updated `data/dispatch_history.json` back to your repository so the syllabus archive and anti-repetition memory remain seamless across all future dispatches.
+
+### Activating Cloud Automation on GitHub
+To enable the cloud runner, simply push this repository to GitHub:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1. Create a new GitHub repository (e.g. personal-university) at https://github.com/new
+# 2. Link and push your repository:
+git remote add origin https://github.com/<your-username>/<your-repo-name>.git
+git push -u origin main
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Once pushed, the **Personal University Daily Morning Dispatch** workflow will automatically activate under the **Actions** tab.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+#### Optional: GitHub Secrets
+For extra security, you can store your credentials in GitHub Secrets (**Settings > Secrets and variables > Actions**):
+- `GMAIL_USER`: `omghubert@gmail.com`
+- `GMAIL_APP_PASSWORD`: your 16-character Google App Password
+- `GEMINI_API_KEY`: (optional) your Gemini API key
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+*(If not set as secrets, the runner securely reads your existing configurations in `data/settings.json`)*.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 💻 Local Commands & Testing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+You can also run the dispatcher or development server locally at any time:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Start the interactive UI
+npm run dev
 
-## Deploy on Vercel
+# Check scheduler status and upcoming run
+npm run dispatch -- --status
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Test generating and delivering a dispatch immediately
+npm run dispatch:test
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Dry-run test (generates lessons and HTML preview without sending email or recording history)
+npm run dispatch -- --dry-run
+```
+
+### Local Scheduler Catch-up Logic
+When running the Next.js server locally (`npm run dev`), the built-in scheduler (`src/lib/serverScheduler.ts`) includes automated catch-up logic:
+- If your computer was asleep or off at 07:00 AM, the scheduler detects upon waking or starting that today's delivery was missed, and immediately triggers catch-up delivery without waiting for tomorrow.
