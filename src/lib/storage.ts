@@ -154,6 +154,9 @@ export function getNewsletterSettings(): NewsletterSettings {
     if (!parsed.emailProvider || parsed.emailProvider === 'mock') {
       parsed.emailProvider = INITIAL_NEWSLETTER_SETTINGS.emailProvider;
     }
+    if (!parsed.deliveryMode) {
+      parsed.deliveryMode = INITIAL_NEWSLETTER_SETTINGS.deliveryMode || 'cloud';
+    }
     return { ...INITIAL_NEWSLETTER_SETTINGS, ...parsed };
   } catch (err) {
     console.error('Failed to read settings from localStorage:', err);

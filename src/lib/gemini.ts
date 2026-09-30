@@ -6,6 +6,7 @@ import {
   normalizeSubject,
   extractSubjectFromSection,
 } from './dispatchHistory';
+import { getServerCuratedLibraries } from './serverStorage';
 
 const ARCHITECT_SYSTEM_INSTRUCTION = `You are the lead Curriculum Architect for "Personal University" — an elite, minimalist educational platform that delivers personalized daily newsletters to lifelong learners.
 Your mission is to converse warmly with the user, understand their intellectual curiosity and learning desires, and refine their ideas into a crisp, impeccably structured "Learning Brief" & Course Instructions.
@@ -30,29 +31,31 @@ export async function runArchitectChat(params: {
   const effectiveKey = params.apiKey || process.env.GEMINI_API_KEY;
 
   if (effectiveKey && effectiveKey.trim().length > 5) {
-    try {
-      const genAI = new GoogleGenerativeAI(effectiveKey.trim());
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-3.6-flash',
-        systemInstruction: ARCHITECT_SYSTEM_INSTRUCTION,
-      });
+    const candidateModels = ['gemini-3.6-flash', 'gemini-flash-latest', 'gemini-3.7-flash', 'gemini-3.8-flash'];
+    for (const modelName of candidateModels) {
+      try {
+        const genAI = new GoogleGenerativeAI(effectiveKey.trim());
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          systemInstruction: ARCHITECT_SYSTEM_INSTRUCTION,
+        });
 
-      const history = params.messages.slice(0, -1).map((m) => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }],
-      }));
+        const history = params.messages.slice(0, -1).map((m) => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }],
+        }));
 
-      const lastUserMessage = params.messages[params.messages.length - 1]?.content || 'Hello';
+        const lastUserMessage = params.messages[params.messages.length - 1]?.content || 'Hello';
 
-      const chat = model.startChat({
-        history,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1500,
-        },
-      });
+        const chat = model.startChat({
+          history,
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1500,
+          },
+        });
 
-      const promptWithContext = `Current Course Title: "${params.course.title}"
+        const promptWithContext = `Current Course Title: "${params.course.title}"
 Current Course Description: "${params.course.description}"
 Current Course Instructions:
 ${params.course.instructions || '(None yet)'}
@@ -60,18 +63,19 @@ ${params.course.instructions || '(None yet)'}
 User's input:
 ${lastUserMessage}`;
 
-      const result = await chat.sendMessage(promptWithContext);
-      const text = result.response.text();
+        const result = await chat.sendMessage(promptWithContext);
+        const text = result.response.text();
 
-      const blueprintMatch = text.match(/(### Course Objective[\s\S]+?)(?=\n\n\*\*Next Steps|\n\nWould you like|\Z)/i);
-      const updatedInstructions = blueprintMatch ? blueprintMatch[1].trim() : undefined;
+        const blueprintMatch = text.match(/(### Course Objective[\s\S]+?)(?=\n\n\*\*Next Steps|\n\nWould you like|\Z)/i);
+        const updatedInstructions = blueprintMatch ? blueprintMatch[1].trim() : undefined;
 
-      return {
-        responseText: text,
-        updatedInstructions,
-      };
-    } catch (err) {
-      console.warn('Live Gemini API call encountered error, falling back to simulated Architect:', err);
+        return {
+          responseText: text,
+          updatedInstructions,
+        };
+      } catch (err) {
+        console.warn(`[Architect] Model ${modelName} encountered error, trying fallback if available:`, err);
+      }
     }
   }
 
@@ -600,22 +604,43 @@ Even if you imagine hanging upside down in a cave, you are merely imagining what
   },
 ];
 
-function getUncoveredSuggestions(courseId: string, pastSubjects: string[]): string[] {
-  let library: CuratedItem[] = [];
-  if (courseId === 'tang-poetry' || courseId.includes('poem')) {
-    library = TANG_POETRY_LIBRARY;
-  } else if (courseId === 'everyday-inventions' || courseId.includes('invent')) {
-    library = EVERYDAY_INVENTIONS_LIBRARY;
-  } else if (courseId === 'philosophy-of-mind' || courseId.includes('philosophy')) {
-    library = PHILOSOPHY_LIBRARY;
+function getLibraryForCourse(courseId: string, courseTitle: string): CuratedItem[] {
+  const isTang =
+    courseId === 'tang-poetry' ||
+    courseTitle.toLowerCase().includes('poem') ||
+    courseTitle.toLowerCase().includes('chinese');
+
+  const isInventions =
+    courseId === 'everyday-inventions' ||
+    courseTitle.toLowerCase().includes('invent');
+
+  const isPhilosophy =
+    courseId === 'philosophy-of-mind' ||
+    courseTitle.toLowerCase().includes('philosophy');
+
+  const serverLibs = getServerCuratedLibraries();
+  if (serverLibs) {
+    if (isTang && serverLibs.tangPoetry?.length) return serverLibs.tangPoetry as CuratedItem[];
+    if (isInventions && serverLibs.everydayInventions?.length) return serverLibs.everydayInventions as CuratedItem[];
+    const philLib = serverLibs.philosophyOfMind || serverLibs.philosophy;
+    if (isPhilosophy && philLib?.length) return philLib as CuratedItem[];
   }
 
+  if (isTang) return TANG_POETRY_LIBRARY;
+  if (isInventions) return EVERYDAY_INVENTIONS_LIBRARY;
+  if (isPhilosophy) return PHILOSOPHY_LIBRARY;
+  return [];
+}
+
+function getUncoveredSuggestions(courseId: string, courseTitle: string, pastSubjects: string[]): string[] {
+  const library = getLibraryForCourse(courseId, courseTitle);
   const uncovered: string[] = [];
+
   for (const item of library) {
     const isDup = pastSubjects.some((past) => {
       const normPast = normalizeSubject(past);
       const normItem = normalizeSubject(item.subject);
-      return normPast.includes(normItem) || normItem.includes(normPast);
+      return normPast === normItem || (normItem.length >= 7 && normPast.includes(normItem));
     });
     if (!isDup) {
       uncovered.push(item.subject);
@@ -634,14 +659,16 @@ export async function generateCourseSectionContent(params: {
   const effectiveKey = params.apiKey || process.env.GEMINI_API_KEY;
   const pastTopics = params.pastTopics || [];
   const { subjects: pastSubjects } = getPastSubjectsForCourse(params.course.id);
-  const uncoveredSuggestions = getUncoveredSuggestions(params.course.id, pastSubjects);
+  const uncoveredSuggestions = getUncoveredSuggestions(params.course.id, params.course.title, pastSubjects);
 
   if (effectiveKey && effectiveKey.trim().length > 5) {
-    try {
-      const genAI = new GoogleGenerativeAI(effectiveKey.trim());
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-3.6-flash',
-        systemInstruction: `You are the lead curriculum author for Personal University daily morning dispatches.
+    const candidateModels = ['gemini-3.6-flash', 'gemini-flash-latest', 'gemini-3.7-flash', 'gemini-3.8-flash'];
+    for (const modelName of candidateModels) {
+      try {
+        const genAI = new GoogleGenerativeAI(effectiveKey.trim());
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          systemInstruction: `You are the lead curriculum author for Personal University daily morning dispatches.
 Your task is to write a single, complete, elegant educational lesson section for the specified course.
 CRITICAL MANDATE:
 1. Every edition MUST explore a BRAND NEW, UNIQUE SUBJECT/ARTIFACT/POEM/PARADOX that has NEVER been covered before.
@@ -650,30 +677,30 @@ SUBJECT_ENTITY: [Name of the specific subject/artifact/poem/paradox, e.g. "The B
 3. Format cleanly with Markdown: use h3 (###) for subsection headers, bolding for key terms, blockquotes for citations, and bullet points.
 4. End with 2-3 bulleted Key Takeaways.
 ZERO REPETITION POLICY: Never repeat a subject from previous editions under any circumstances.`,
-      });
+        });
 
-      // Strict exclusion block with zero tolerance for repeated subjects
-      const forbiddenBlock = pastSubjects.length > 0
-        ? `\n\n=======================================================\n` +
-          `STRICT FORBIDDEN REPEATED SUBJECTS (ZERO TOLERANCE):\n` +
-          `The subscriber has ALREADY received dispatches on the following specific subjects:\n` +
-          pastSubjects.map((s) => `❌ FORBIDDEN (DO NOT WRITE ABOUT THIS): "${s}"`).join('\n') +
-          `\n\nYou MUST NOT write about any of the above subjects, inventions, poems, or paradoxes, even with completely different wording or a different historical angle.\n` +
-          `Writing about any forbidden subject will cause the dispatch to be automatically rejected.\n` +
-          (uncoveredSuggestions.length > 0
-            ? `\nRECOMMENDED UNCOVERED SUBJECTS FOR TODAY (CHOOSE ONE OR PROPOSE ANOTHER FRESH TOPIC):\n` +
-              uncoveredSuggestions.slice(0, 5).map((s) => `✓ ${s}`).join('\n')
-            : '') +
-          `\n=======================================================\n`
-        : '';
+        // Strict exclusion block with zero tolerance for repeated subjects
+        const forbiddenBlock = pastSubjects.length > 0
+          ? `\n\n=======================================================\n` +
+            `STRICT FORBIDDEN REPEATED SUBJECTS (ZERO TOLERANCE):\n` +
+            `The subscriber has ALREADY received dispatches on the following specific subjects:\n` +
+            pastSubjects.map((s) => `❌ FORBIDDEN (DO NOT WRITE ABOUT THIS): "${s}"`).join('\n') +
+            `\n\nYou MUST NOT write about any of the above subjects, inventions, poems, or paradoxes, even with completely different wording or a different historical angle.\n` +
+            `Writing about any forbidden subject will cause the dispatch to be automatically rejected.\n` +
+            (uncoveredSuggestions.length > 0
+              ? `\nRECOMMENDED UNCOVERED SUBJECTS FOR TODAY (CHOOSE ONE OR PROPOSE ANOTHER FRESH TOPIC):\n` +
+                uncoveredSuggestions.slice(0, 5).map((s) => `✓ ${s}`).join('\n')
+              : '') +
+            `\n=======================================================\n`
+          : '';
 
-      // Clean course instructions to prevent LLM from anchoring on default prompt examples
-      const sanitizedInstructions = (params.course.instructions || '')
-        .replace(/\(e\.g\.,?\s*zippers[^\)]*\)/gi, '(e.g., choose from diverse historical inventions)')
-        .replace(/\(e\.g\.,?\s*Thoughts on a Quiet Night[^\)]*\)/gi, '(e.g., choose from celebrated Tang poets)')
-        .replace(/\(e\.g\.,?\s*Mary the Color Scientist[^\)]*\)/gi, '(e.g., choose from foundational cognitive paradoxes)');
+        // Clean course instructions to prevent LLM from anchoring on default prompt examples
+        const sanitizedInstructions = (params.course.instructions || '')
+          .replace(/\(e\.g\.,?\s*zippers[^\)]*\)/gi, '(e.g., choose from diverse historical inventions)')
+          .replace(/\(e\.g\.,?\s*Thoughts on a Quiet Night[^\)]*\)/gi, '(e.g., choose from celebrated Tang poets)')
+          .replace(/\(e\.g\.,?\s*Mary the Color Scientist[^\)]*\)/gi, '(e.g., choose from foundational cognitive paradoxes)');
 
-      const prompt = `Generate today's daily dispatch section for the following course:
+        const prompt = `Generate today's daily dispatch section for the following course:
 Date: ${params.date}
 Edition: #${params.editionNumber || 1}
 Course Title: ${params.course.title}
@@ -684,52 +711,53 @@ ${forbiddenBlock}
 
 Remember: First line MUST be "SUBJECT_ENTITY: [Subject Name]". Then provide the complete lesson. Do NOT choose any forbidden subject.`;
 
-      const result = await model.generateContent(prompt);
-      const rawText = result.response.text();
+        const result = await model.generateContent(prompt);
+        const rawText = result.response.text();
 
-      // Extract subject entity tag
-      let extractedSubject = '';
-      const subjectMatch = rawText.match(/SUBJECT_ENTITY:\s*([^\n\r]+)/i);
-      if (subjectMatch) {
-        extractedSubject = subjectMatch[1].trim();
-      } else {
-        const titleMatch = rawText.match(/^###\s+([^\n\r]+)/m);
-        extractedSubject = titleMatch ? titleMatch[1].trim() : params.course.title;
+        // Extract subject entity tag
+        let extractedSubject = '';
+        const subjectMatch = rawText.match(/SUBJECT_ENTITY:\s*([^\n\r]+)/i);
+        if (subjectMatch) {
+          extractedSubject = subjectMatch[1].trim();
+        } else {
+          const titleMatch = rawText.match(/^###\s+([^\n\r]+)/m);
+          extractedSubject = titleMatch ? titleMatch[1].trim() : params.course.title;
+        }
+
+        // Clean metadata tag from markdown content
+        const cleanContent = rawText.replace(/SUBJECT_ENTITY:\s*[^\n\r]+\n*/i, '').trim();
+
+        // Subject Collision Guard: verify candidate is not a duplicate
+        const collision = isSubjectDuplicate(params.course.id, extractedSubject, cleanContent);
+        if (collision.isDuplicate) {
+          console.warn(
+            `[Subject Collision Guard] Gemini output duplicated subject "${collision.matchedSubject}" for course "${params.course.title}". Triggering guaranteed unique curriculum fallback.`
+          );
+          return getCuratedSampleSection(params.course, params.date, pastTopics, params.editionNumber);
+        }
+
+        const titleMatch = cleanContent.match(/^###\s+([^\n\r]+)/m);
+        const topicTitle = titleMatch ? titleMatch[1].trim() : `${params.course.title} — ${extractedSubject}`;
+
+        return {
+          courseId: params.course.id,
+          courseTitle: params.course.title,
+          category: params.course.category,
+          readingTimeMinutes: params.course.readingTimeMinutes || 3,
+          topicTitle,
+          subject: extractedSubject,
+          content: cleanContent,
+          keyTakeaways: [
+            'Synthesized specifically for today\'s personal dispatch',
+            'Follows your custom curriculum blueprint with guaranteed non-repeating focus',
+          ],
+          sourceLinks: [
+            { title: 'Personal University Syllabus Archive', url: '#' },
+          ],
+        };
+      } catch (err) {
+        console.warn(`[Gemini] Model ${modelName} section generation error:`, err);
       }
-
-      // Clean metadata tag from markdown content
-      const cleanContent = rawText.replace(/SUBJECT_ENTITY:\s*[^\n\r]+\n*/i, '').trim();
-
-      // Subject Collision Guard: verify candidate is not a duplicate
-      const collision = isSubjectDuplicate(params.course.id, extractedSubject, cleanContent);
-      if (collision.isDuplicate) {
-        console.warn(
-          `[Subject Collision Guard] Gemini output duplicated subject "${collision.matchedSubject}" for course "${params.course.title}". Triggering guaranteed unique curriculum fallback.`
-        );
-        return getCuratedSampleSection(params.course, params.date, pastTopics, params.editionNumber);
-      }
-
-      const titleMatch = cleanContent.match(/^###\s+([^\n\r]+)/m);
-      const topicTitle = titleMatch ? titleMatch[1].trim() : `${params.course.title} — ${extractedSubject}`;
-
-      return {
-        courseId: params.course.id,
-        courseTitle: params.course.title,
-        category: params.course.category,
-        readingTimeMinutes: params.course.readingTimeMinutes || 3,
-        topicTitle,
-        subject: extractedSubject,
-        content: cleanContent,
-        keyTakeaways: [
-          'Synthesized specifically for today\'s personal dispatch',
-          'Follows your custom curriculum blueprint with guaranteed non-repeating focus',
-        ],
-        sourceLinks: [
-          { title: 'Personal University Syllabus Archive', url: '#' },
-        ],
-      };
-    } catch (err) {
-      console.warn('Live Gemini section generation error, falling back to curated sequential library:', err);
     }
   }
 
@@ -743,28 +771,7 @@ function getCuratedSampleSection(
   pastTopics: string[] = [],
   editionNumber?: number
 ): NewsletterSection {
-  const isTang =
-    course.id === 'tang-poetry' ||
-    course.title.toLowerCase().includes('poem') ||
-    course.title.toLowerCase().includes('chinese');
-
-  const isInventions =
-    course.id === 'everyday-inventions' ||
-    course.title.toLowerCase().includes('invent');
-
-  const isPhilosophy =
-    course.id === 'philosophy-of-mind' ||
-    course.title.toLowerCase().includes('philosophy');
-
-  let library: CuratedItem[] = [];
-
-  if (isTang) {
-    library = TANG_POETRY_LIBRARY;
-  } else if (isInventions) {
-    library = EVERYDAY_INVENTIONS_LIBRARY;
-  } else if (isPhilosophy) {
-    library = PHILOSOPHY_LIBRARY;
-  }
+  const library = getLibraryForCourse(course.id, course.title);
 
   // Find the first item in the library whose SUBJECT has NOT been used yet
   let selectedItem: CuratedItem | undefined;
@@ -777,11 +784,8 @@ function getCuratedSampleSection(
     }
   }
 
-  // Fallback sequential index if all standard library items have been used
-  if (!selectedItem && library.length > 0) {
-    const cycleIndex = (pastTopics.length || (editionNumber || 1) - 1) % library.length;
-    selectedItem = library[cycleIndex];
-  }
+  // NOTE: NEVER cycle with modulo! Modulo causes duplicate repetitions.
+  // If all curated items in the library have been used, proceed to progressive focus modules.
 
   if (selectedItem) {
     return {
@@ -797,9 +801,9 @@ function getCuratedSampleSection(
     };
   }
 
-  // Dynamic progressive installment for user-created custom courses
+  // Dynamic progressive installment for user-created custom courses or when library is exhausted
   const dayIndex = pastTopics.length + 1;
-  const customTopicTitle = `${course.title} — Focus Module #${dayIndex}`;
+  const customTopicTitle = `${course.title} — Advanced Module #${dayIndex}`;
 
   return {
     courseId: course.id,

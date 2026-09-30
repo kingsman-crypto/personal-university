@@ -18,6 +18,9 @@ import {
   Check,
   AlertCircle,
   BookOpen,
+  Cloud,
+  Cpu,
+  Radio,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Header } from '@/components/Header';
@@ -341,7 +344,94 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* 2. Publication Identity & Recipient */}
+          {/* 2. Delivery Engine & Dispatch Coordinator */}
+          <div className="bg-white border border-[#E7E2DA] rounded-2xl p-6 sm:p-8 shadow-2xs space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#FAF8F5] border border-[#E8E2D8] text-[#78350F]">
+                <Cloud className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="font-serif text-lg font-bold text-[#1C1917]">
+                  Delivery Engine &amp; Dispatch Coordinator
+                </h2>
+                <p className="text-xs text-[#78716C]">
+                  Select which engine triggers your morning dispatch to guarantee zero duplicate emails
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setSettings({ ...settings, deliveryMode: 'cloud' })}
+                className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                  (settings.deliveryMode || 'cloud') === 'cloud'
+                    ? 'bg-[#FDFCFA] border-[#78350F] ring-1 ring-[#78350F]/20 shadow-xs'
+                    : 'bg-[#FAF8F5] border-[#E7E2DA] hover:border-[#DCD5C9]'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Cloud className="w-4 h-4 text-[#78350F]" />
+                    <span className="font-semibold text-xs text-[#1C1917]">GitHub Actions (Cloud)</span>
+                  </div>
+                  <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                    Recommended
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#78716C] leading-relaxed">
+                  Zero-machine delivery. Runs automatically at 7:00 AM Eastern from GitHub Actions cloud runner. Eliminates duplicate morning emails.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSettings({ ...settings, deliveryMode: 'local' })}
+                className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                  settings.deliveryMode === 'local'
+                    ? 'bg-[#FDFCFA] border-[#78350F] ring-1 ring-[#78350F]/20 shadow-xs'
+                    : 'bg-[#FAF8F5] border-[#E7E2DA] hover:border-[#DCD5C9]'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Cpu className="w-4 h-4 text-[#78350F]" />
+                  <span className="font-semibold text-xs text-[#1C1917]">Local Server Scheduler</span>
+                </div>
+                <p className="text-[11px] text-[#78716C] leading-relaxed">
+                  Sends automated morning dispatches via your local Next.js background process when your computer is running.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSettings({ ...settings, deliveryMode: 'manual' })}
+                className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                  settings.deliveryMode === 'manual'
+                    ? 'bg-[#FDFCFA] border-[#78350F] ring-1 ring-[#78350F]/20 shadow-xs'
+                    : 'bg-[#FAF8F5] border-[#E7E2DA] hover:border-[#DCD5C9]'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Radio className="w-4 h-4 text-[#78350F]" />
+                  <span className="font-semibold text-xs text-[#1C1917]">Manual / On-Demand Only</span>
+                </div>
+                <p className="text-[11px] text-[#78716C] leading-relaxed">
+                  Automated background dispatches disabled. Issues are triggered on-demand via the &quot;Send Scheduled Dispatch Now&quot; button.
+                </p>
+              </button>
+            </div>
+
+            {(settings.deliveryMode || 'cloud') === 'cloud' && (
+              <div className="p-3 bg-[#F4F8F4] border border-[#D5E5D5] rounded-xl text-xs text-[#234B23] flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <p className="text-[11px] leading-relaxed">
+                  <strong>Zero-Collision Active:</strong> Cloud Runner handles scheduled morning dispatches. The local Next.js server will not send unsolicited morning emails upon awakening.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* 3. Publication Identity & Recipient */}
           <div className="bg-white border border-[#E7E2DA] rounded-2xl p-6 sm:p-8 shadow-2xs space-y-6">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-[#FAF8F5] border border-[#E8E2D8] text-[#78350F]">

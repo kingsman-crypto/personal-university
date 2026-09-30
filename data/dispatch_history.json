@@ -146,6 +146,28 @@
     "generatedAt": "2026-09-17T14:58:29.987Z"
   },
   {
+    "title": "Daily Briefing",
+    "date": "Sunday, September 27, 2026",
+    "editionNumber": 2,
+    "sections": [
+      {
+        "courseId": "tang-poetry",
+        "courseTitle": "Tang Poetry",
+        "readingTimeMinutes": 3,
+        "content": "### Fresh Morning Poetry\n*Spring Morning by Meng Haoran*",
+        "keyTakeaways": [
+          "Delivered directly to your inbox"
+        ],
+        "subject": "Fresh Morning Poetry",
+        "subjectKeywords": [
+          "fresh",
+          "morning",
+          "poetry"
+        ]
+      }
+    ]
+  },
+  {
     "id": "dispatch-1789748666392",
     "date": "Friday, September 18, 2026",
     "editionNumber": 3,
@@ -492,6 +514,95 @@
     "generatedAt": "2026-09-23T11:16:05.270Z"
   },
   {
+    "id": "dispatch-1790594682521",
+    "date": "Monday, September 28, 2026",
+    "editionNumber": 6,
+    "title": "The Personal University Dispatch",
+    "sections": [
+      {
+        "courseId": "tang-poetry",
+        "courseTitle": "Tang Poetry & Classical Chinese",
+        "category": "Language & Poetry",
+        "readingTimeMinutes": 3,
+        "topicTitle": "Today's Poem: Grass on the Ancient Plain (赋得古原草送别) by Bai Juyi",
+        "subject": "Grass on the Ancient Plain (赋得古原草送别) by Bai Juyi",
+        "content": "### Today's Poem: *Grass on the Ancient Plain* (赋得古原草送别)\n**Poet:** Bai Juyi (白居易, 772–846 CE)  \n**Dynasty:** Mid-Tang (composed at age 16)\n\n> **离离原上草，** (Lí lí yuán shàng cǎo,)  \n> **一岁一枯荣。** (Yí suì yì kū róng.)  \n> **野火烧不尽，** (Yě huǒ shāo bú jìn,)  \n> **春风吹又生。** (Chūn fēng chuī yòu shēng.)\n\n### English Translation\n> *Boundless grows the grass upon the ancient plain,*  \n> *Each year it withers, then flourishes again.*  \n> *Wildfires cannot burn it all away;*  \n> *The spring wind blows, and it is born anew.*\n\n### Historical & Cultural Context\nWhen sixteen-year-old Bai Juyi arrived in Chang'an, scholar Gu Kuang joked that life in the capital was expensive (*Bai Ju Yi* = \"living easily is hard\"). But upon reading these lines, Gu Kuang exclaimed: \"Anyone who can write poetry like this will find living anywhere in the empire easy!\"\n\n### Famous Proverb: 野火烧不尽，春风吹又生\nThe supreme metaphor for grassroots resilience, indomitable spirit, and life's ability to outlast devastation.",
+        "keyTakeaways": [
+          "The wild grass symbolizes the unconquerable vitality of the common people and natural law.",
+          "Bai Juyi's hallmark style: crystalline clarity accessible to commoners and scholars alike."
+        ],
+        "sourceLinks": [
+          {
+            "title": "Tang Literary Biographies",
+            "url": "https://ctext.org"
+          }
+        ],
+        "subjectKeywords": [
+          "grass",
+          "the",
+          "ancient",
+          "plain",
+          "赋得古原草送别",
+          "bai",
+          "juyi"
+        ]
+      },
+      {
+        "courseId": "everyday-inventions",
+        "courseTitle": "History of Everyday Inventions",
+        "category": "History & Design",
+        "readingTimeMinutes": 4,
+        "topicTitle": "The Artifact: The Universal Product Code & Barcode (1948–1974)",
+        "subject": "The Universal Product Code & Barcode",
+        "content": "### The Artifact: The Barcode & UPC Scanner (1948–1974)\n**Primary Inventors:** Norman Joseph Woodland & Bernard Silver  \n**Historic First Scan:** Pack of Wrigley's Juicy Fruit Gum (June 26, 1974)\n\n### The Hidden Friction\nIn 1948, supermarket checkouts backed up for blocks as cashiers manually entered prices from stamped price stickers on every individual item. Supermarkets pleaded for automated data capture.\n\n### The Eureka Spark: Morse Code in Miami Sand\nSitting on a beach in Miami, Woodland absentmindedly dragged his fingers through the sand, tracing dots and dashes of Morse code. He suddenly wondered: \"What if I drag my fingers downward to stretch those dots and dashes into thick and thin vertical lines?\"\n\n### Modern Ripple Effect\nDecades later, laser scanners and IBM mainframe integration made the UPC practical. Today, global supply chains and modern retail logistics are completely dependent on Woodland's sand drawing.",
+        "keyTakeaways": [
+          "Linear optical encoding converted physical merchandise into real-time database entries.",
+          "Transformed inventory tracking from manual paper tallies into modern just-in-time global logistics."
+        ],
+        "sourceLinks": [
+          {
+            "title": "Smithsonian National Museum of American History: First Barcode Scan",
+            "url": "https://americanhistory.si.edu"
+          }
+        ],
+        "subjectKeywords": [
+          "the",
+          "universal",
+          "product",
+          "code",
+          "barcode"
+        ]
+      },
+      {
+        "courseId": "philosophy-of-mind",
+        "courseTitle": "Philosophy of Mind & Epistemology",
+        "category": "Philosophy",
+        "readingTimeMinutes": 3,
+        "topicTitle": "Thought Experiment: What Is It Like to Be a Bat?",
+        "subject": "What Is It Like to Be a Bat? (Nagel on Consciousness)",
+        "content": "### The Thought Experiment: What Is It Like to Be a Bat?\n**Philosopher:** Thomas Nagel  \n**Origin:** *The Philosophical Review* (1974)\n\n### The Setup\nBats navigate in total darkness through echolocation. We can study their neurobiology and sonar physics down to the last synapse. \n\nYet Nagel asks: **Can any human ever know what it feels like for a bat to be a bat?**\n\n### The Explanatory Gap\nEven if you imagine hanging upside down in a cave, you are merely imagining what it would feel like for a *human* to act like a bat. Consciousness is fundamentally subjective and first-person. Objective third-person physical descriptions leave out the essence of experience.",
+        "keyTakeaways": [
+          "Consciousness requires a subjective, first-person point of view that cannot be reduced to third-person physical descriptions.",
+          "Coined the foundational phrase: \"There is something that it is like to be.\""
+        ],
+        "sourceLinks": [
+          {
+            "title": "Thomas Nagel: What Is It Like to Be a Bat?",
+            "url": "https://philpapers.org"
+          }
+        ],
+        "subjectKeywords": [
+          "what",
+          "like",
+          "bat",
+          "nagel",
+          "consciousness"
+        ]
+      }
+    ],
+    "generatedAt": "2026-09-28T11:24:42.521Z"
+  },
+  {
     "id": "dispatch-1790248595273",
     "date": "Thursday, September 24, 2026",
     "editionNumber": 7,
@@ -577,6 +688,92 @@
       }
     ],
     "generatedAt": "2026-09-24T11:16:35.273Z"
+  },
+  {
+    "id": "dispatch-1790683177814",
+    "date": "Tuesday, September 29, 2026",
+    "editionNumber": 7,
+    "title": "The Personal University Dispatch",
+    "sections": [
+      {
+        "courseId": "tang-poetry",
+        "courseTitle": "Tang Poetry & Classical Chinese",
+        "category": "Language & Poetry",
+        "readingTimeMinutes": 3,
+        "topicTitle": "Today's Poem: Thoughts on a Quiet Night (静夜思) by Li Bai",
+        "subject": "Thoughts on a Quiet Night (静夜思) by Li Bai",
+        "content": "### Today's Poem: *Thoughts on a Quiet Night* (静夜思)\n**Poet:** Li Bai (李白, 701–762 CE)  \n**Dynasty:** Tang Dynasty (c. 726 CE)\n\n> **床前明月光，** (Chuáng qián míng yuè guāng,)  \n> **疑是地上霜。** (Yí shì dì shàng shuāng.)  \n> **举头望明月，** (Jǔ tóu wàng míng yuè,)  \n> **低头思故乡。** (Dī tóu sī gù xiāng.)\n\n### English Translation\n> *Before my bed the bright moonbeams spread,*  \n> *Looking like frost upon the frozen ground.*  \n> *Lifting my head, I gaze at the luminous moon;*  \n> *Bowing my head, I dream of my distant home.*\n\n### Historical & Cultural Context\nLi Bai composed this immortal quatrain while residing in an inn in Yangzhou during the autumn of 726. Far from his home in Sichuan and recuperating from an illness, the sudden silver illumination on the courtyard stone woke him with the chilling illusion of late-autumn frost. In Chinese aesthetics, the full autumn moon is the quintessential symbol of family reunion (*Tuanyuan*).\n\n### Character Spotlight: 霜 (Shuāng — Frost)\n- **Radical:** 雨 (Rain / Precipitation)\n- **Poetic Resonance:** In Tang poetics, frost symbolizes not merely coldness, but solitary contemplation and the passage of youth.",
+        "keyTakeaways": [
+          "Mastery of pentasyllabic Jueju structure: 20 characters conveying profound homesickness.",
+          "The juxtaposition of moonlight and frost functions as a sensory bridge between perception and memory."
+        ],
+        "sourceLinks": [
+          {
+            "title": "Tang Poetry Digital Concordance",
+            "url": "https://ctext.org"
+          }
+        ],
+        "subjectKeywords": [
+          "thoughts",
+          "quiet",
+          "night",
+          "静夜思",
+          "bai"
+        ]
+      },
+      {
+        "courseId": "everyday-inventions",
+        "courseTitle": "History of Everyday Inventions",
+        "category": "History & Design",
+        "readingTimeMinutes": 3,
+        "topicTitle": "The Artifact: The Safety Pin (1849)",
+        "subject": "The Safety Pin",
+        "content": "### The Artifact: The Safety Pin (1849)\n**Primary Inventor:** Walter Hunt  \n**Key Patent:** U.S. Patent No. 6,281 (April 10, 1849)\n\n### The Hidden Friction\nStraight pins routinely worked loose from garments, stabbing wearers and pricking infants during diapering. They had no clasp to shield the sharp point.\n\n### The Invention in Three Hours\nWalter Hunt owed a friend $15 ($500 today). Needing quick cash, he sat down with an eight-inch piece of brass wire. In under three hours, he twisted the wire with a coiled spring at its base to provide outward tension and shaped a protective clasp at the head to conceal the sharp point.\n\n### Modern Ripple Effect\nHunt sold the patent rights for $400 to pay off his debt. The buyer made millions. 175 years later, the coiled wire spring and clasp remain structurally unaltered.",
+        "keyTakeaways": [
+          "Combined spring tension and a clasp shield into a single contiguous wire.",
+          "One of history's purest examples of minimalist mechanical efficiency."
+        ],
+        "sourceLinks": [
+          {
+            "title": "USPTO Historic Patent Archives: Walter Hunt",
+            "url": "https://www.uspto.gov"
+          }
+        ],
+        "subjectKeywords": [
+          "the",
+          "safety",
+          "pin"
+        ]
+      },
+      {
+        "courseId": "philosophy-of-mind",
+        "courseTitle": "Philosophy of Mind & Epistemology",
+        "category": "Philosophy",
+        "readingTimeMinutes": 3,
+        "topicTitle": "Thought Experiment: The Ship of Theseus & Identity Over Time",
+        "subject": "The Ship of Theseus (Identity Over Time)",
+        "content": "### The Paradox: The Ship of Theseus\n**Origins:** Plutarch (*Life of Theseus*) & Thomas Hobbes (1655)\n\n### The Setup\nTheseus returns to Athens with his flagship. The Athenians preserve the ship for centuries. As wooden planks rot, shipwrights replace them with fresh timber. After two hundred years, **every single plank, spar, and nail has been replaced.**\n\n**Question 1:** Is the ship in the harbor still the Ship of Theseus?\n\n### The Hobbesian Complication\nSuppose a curator collected all the rotting original planks, repaired them, and reassembled them in a drydock. \n**Question 2:** Which ship is the authentic Ship of Theseus: the renovated ship in the harbor, or the reassembled ship in the drydock?",
+        "keyTakeaways": [
+          "Distinguishes between material identity (substance) and formal identity (configuration/continuity).",
+          "Directly informs debates in personal identity, cell regeneration, and teleportation."
+        ],
+        "sourceLinks": [
+          {
+            "title": "Stanford Encyclopedia of Philosophy: Identity Over Time",
+            "url": "https://plato.stanford.edu"
+          }
+        ],
+        "subjectKeywords": [
+          "the",
+          "ship",
+          "theseus",
+          "identity",
+          "over",
+          "time"
+        ]
+      }
+    ],
+    "generatedAt": "2026-09-29T11:59:37.814Z"
   },
   {
     "id": "dispatch-1790334984439",

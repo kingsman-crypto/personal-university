@@ -106,3 +106,37 @@ export function saveServerHistory(history: NewsletterIssue[]): void {
     console.error('Error saving history to data/dispatch_history.json:', err);
   }
 }
+
+const CURATED_LIBRARIES_FILE = path.join(DATA_DIR, 'curated_libraries.json');
+
+export interface CuratedLibraryItem {
+  id: string;
+  subject: string;
+  title: string;
+  category: string;
+  readingTimeMinutes: number;
+  content: string;
+  keyTakeaways: string[];
+  sourceLinks: Array<{ title: string; url: string }>;
+}
+
+export interface CuratedLibrariesMap {
+  tangPoetry?: CuratedLibraryItem[];
+  everydayInventions?: CuratedLibraryItem[];
+  philosophyOfMind?: CuratedLibraryItem[];
+  [key: string]: CuratedLibraryItem[] | undefined;
+}
+
+export function getServerCuratedLibraries(): CuratedLibrariesMap | null {
+  ensureDataDir();
+  try {
+    if (fs.existsSync(CURATED_LIBRARIES_FILE)) {
+      const raw = fs.readFileSync(CURATED_LIBRARIES_FILE, 'utf-8');
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    console.error('Error reading curated libraries from data/curated_libraries.json:', err);
+  }
+  return null;
+}
+

@@ -98,6 +98,7 @@ export const INITIAL_NEWSLETTER_SETTINGS: NewsletterSettings = {
   deliveryTime: '07:00',
   timezone: 'America/New_York',
   emailProvider: 'gmail',
+  deliveryMode: 'cloud',
   senderEmail: 'Personal University <onboarding@resend.dev>',
   gmailUser: 'omghubert@gmail.com',
   gmailAppPassword: 'abwl bvil axrc rmba',

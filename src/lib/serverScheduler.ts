@@ -116,6 +116,20 @@ function getZonedParts(timeZone: string, date: Date = new Date()) {
 
 export async function checkAndExecuteSchedule(): Promise<void> {
   const settings = getServerSettings();
+  const deliveryMode = settings.deliveryMode || 'cloud';
+
+  // 1. Cloud Mode: GitHub Actions cloud runner is the primary autonomous engine.
+  // The local server ticker does NOT fire background or catch-up emails, eliminating duplicate dispatches.
+  if (deliveryMode === 'cloud') {
+    return;
+  }
+
+  // 2. Manual Mode: Automated scheduled sending is paused.
+  if (deliveryMode === 'manual') {
+    return;
+  }
+
+  // 3. Local Mode: Local background scheduler
   const tz = settings.timezone || 'America/New_York';
   const { dayOfWeek, timeHHMM, dateKey, fullDateStr } = getZonedParts(tz);
 
@@ -131,7 +145,7 @@ export async function checkAndExecuteSchedule(): Promise<void> {
     return;
   }
 
-  // Prevent double sending within the same calendar day
+  // Prevent double sending within the same calendar day across re-renders and reloads
   const dispatchKey = `${dateKey}_dispatched`;
   if (globalForScheduler.__pu_last_dispatched_key__ === dispatchKey) {
     return;
@@ -144,7 +158,7 @@ export async function checkAndExecuteSchedule(): Promise<void> {
   globalForScheduler.__pu_last_dispatched_key__ = dispatchKey;
   const isCatchUp = timeHHMM > configuredTime;
   console.log(
-    `[Scheduler] Triggering ${isCatchUp ? 'catch-up' : 'scheduled'} dispatch for ${fullDateStr} (current time: ${timeHHMM}, target: ${configuredTime} ${tz})...`
+    `[Scheduler] Triggering local ${isCatchUp ? 'catch-up' : 'scheduled'} dispatch for ${fullDateStr} (current time: ${timeHHMM}, target: ${configuredTime} ${tz})...`
   );
 
   try {
@@ -301,6 +315,17 @@ export async function executeScheduledDispatch(trigger: 'scheduled' | 'manual' |
 }
 
 export function getNextScheduledRun(settings: NewsletterSettings): string {
+  const deliveryMode = settings.deliveryMode || 'cloud';
+
+  if (deliveryMode === 'manual') {
+    return 'Manual On-Demand Only (Automated sending paused)';
+  }
+
+  if (deliveryMode === 'cloud') {
+    const tz = settings.timezone || 'America/New_York';
+    return `Cloud Runner (GitHub Actions) weekdays at ${settings.deliveryTime || '07:00'} (${tz})`;
+  }
+
   if (!settings.deliveryDays || settings.deliveryDays.length === 0) {
     return 'No delivery days selected';
   }
@@ -345,7 +370,8 @@ export function getSchedulerStatus() {
   const nextRun = getNextScheduledRun(settings);
 
   return {
-    active: true,
+    active: (settings.deliveryMode || 'cloud') !== 'manual',
+    deliveryMode: settings.deliveryMode || 'cloud',
     emailProvider: settings.emailProvider,
     recipientEmail: settings.recipientEmail,
     deliveryTime: settings.deliveryTime,

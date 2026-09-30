@@ -30,6 +30,7 @@ export interface NewsletterSettings {
   deliveryTime: string; // "07:00"
   timezone: string;
   emailProvider: 'mock' | 'resend' | 'gmail';
+  deliveryMode?: 'cloud' | 'local' | 'manual'; // 'cloud' (GitHub Actions - Zero-Machine), 'local' (server background), 'manual' (on-demand only)
   resendApiKey?: string;
   senderEmail?: string;
   gmailUser?: string;
